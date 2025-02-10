@@ -1,0 +1,41 @@
+name: Deploy Food Delivery Analysis
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1  # Oslo region
+
+      - name: Copy files to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem -o StrictHostKeyChecking=no \
+            {food_delivery_mvp.py,Dockerfile,docker-compose.yml,requirements.txt} \
+            ec2-user@${HOST}:~/food-delivery-analysis/
+
+      - name: Deploy application
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ec2-user@${HOST} '
+            cd food-delivery-analysis && 
+            docker-compose down &&
+            docker-compose up -d --build
+          '
