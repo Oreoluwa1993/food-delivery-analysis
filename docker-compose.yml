@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  food-delivery-analyzer:
+    build: .
+    volumes:
+      - ./data:/app/data
+    environment:
+      - SCHEDULE_INTERVAL=24  # Run every 24 hours
+    restart: unless-stopped
