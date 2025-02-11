@@ -8,3 +8,14 @@ services:
     environment:
       - SCHEDULE_INTERVAL=24  # Run every 24 hours
     restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"  # Map port 3000 to host
+    volumes:
+      - ./data:/app/data  # Share the data directory
+    depends_on:
+      - food-delivery-analyzer
