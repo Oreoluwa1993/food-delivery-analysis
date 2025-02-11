@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   food-delivery-analyzer:
-    build: .
+    image: yourusername/food-delivery-analyzer:latest
     volumes:
       - ./data:/app/data
     environment:
@@ -10,9 +10,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
+    image: yourusername/food-delivery-frontend:latest
     ports:
       - "3000:3000"  # Map port 3000 to host
     volumes:
